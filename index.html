@@ -1,19 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connect Four</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect Four</title>
 
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
-</head>
-<body>
-  <div class="heading">Connect Four</div>
-  <div class="game">
-    <div class="info"></div>
-    <div class="board"></div>
-  </div>
-</body>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="name">Connect Four</div>
+
+    <div class="display-wrapper front-page">
+      <div class="game-modes">
+        <button class="mode computer">Play against Computer</button>
+        <button class="mode friend">Play with Friend</button>
+      </div>
+    </div>
+
+    <div class="display-wrapper naming-page computer">
+      <form action="" class="naming-form">
+        <div class="heading">Enter your name</div>
+        <div class="field">
+          <label for="player">Player: </label>
+          <input type="text" name="player-name" id="player" placeholder="Player" />
+        </div>
+        <div class="field">
+          <label for="player-turn">Play as: </label>
+          <div class="selection">
+            <input
+              type="radio"
+              name="player-type"
+              id="player-one"
+              value="one"
+              checked
+            />
+            <label for="player-one">Player One</label>
+            <input
+              type="radio"
+              name="player-type"
+              id="player-two"
+              value="two"
+            />
+            <label for="player-two">Player Two</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="back">Cancel</button>
+          <button class="play computer">Play Game</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="display-wrapper naming-page friend">
+      <form action="" class="naming-form">
+        <div class="heading">Enter your names</div>
+        <div class="field">
+          <label for="player-one">Player 1: </label>
+          <input type="text" name="player-one" placeholder="Player 1" />
+        </div>
+        <div class="field">
+          <label for="player-two">Player 2: </label>
+          <input type="text" name="player-two" placeholder="Player 2" />
+        </div>
+        <div class="form-actions">
+          <button class="back">Cancel</button>
+          <button class="play friend">Play Game</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="display-wrapper game-page">
+      <div class="game">
+        <div class="info"></div>
+        <div class="board"></div>
+      </div>
+      <div class="game-actions">
+        <button class="reset">Reset Game</button>
+        <button class="back">Quit Game</button>
+      </div>
+    </div>
+
+    <div class="display-wrapper end-page">
+      <div class="result"></div>
+      <div class="scores">
+        <div class="heading">Scores</div>
+        <div class="entry">
+          <div class="player"></div>
+          <div class="score"></div>
+        </div>
+        <div class="entry">
+          <div class="player"></div>
+          <div class="score"></div>
+        </div>
+      </div>
+      <div class="end-actions">
+        <button class="restart">Play Again</button>
+        <button class="back">Quit Game</button>
+      </div>
+      <div class="plug">Made by Shamblonaut</div>
+    </div>
+  </body>
 </html>

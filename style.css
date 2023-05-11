@@ -7,19 +7,91 @@
 body {
   min-height: 100vh;
   font-family: sans-serif;
-  background-color: #ecfccb;
-  color: #1a2e05;
+  background-color: #85b624;
+  color: #dce7cf;
   display: flex;
   flex-direction: column;
 }
 
-.heading {
+input {
+  margin-left: 10px;
+  padding: 5px;
+  border: none;
+  border-radius: 5px;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background-color: #16a34a;
+  color: #dce7cf;
+}
+
+.name {
   text-align: center;
   font-size: 2rem;
 }
 
-.game {
+.display-wrapper {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.display-wrapper > * {
+  margin: 20px 0;
+}
+
+.game-modes {
+  display: flex;
+  flex-direction: column;
+}
+
+.mode {
+  padding: 25px;
+  margin: 25px;
+  background-color: #397072;
+  border: none;
+  border-radius: 10px;
+}
+
+.naming-form {
+  background-color: #2563eb;
+  padding: 25px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.naming-form > * {
+  margin: 10px;
+}
+
+.heading {
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+}
+
+.form-actions {
+  display: flex;
+  margin-top: 10px;
+}
+
+.play, .back {
+  flex: 1;
+  margin: 0 5px;
+}
+
+.game {
   display: grid;
   grid-template-rows: repeat(2, min-content);
   justify-content: center;
@@ -45,6 +117,9 @@ body {
 }
 
 .square {
+  border-radius: 0;
+  padding: 0;
+
   background-color: transparent;
   border: 3px solid #fcd34d;
   border-width: 0 3px 3px 0;
@@ -65,4 +140,43 @@ body {
 
 .piece.two {
   background-color: #2563eb;
+}
+
+.piece.won {
+  background-color: #16a34a;
+}
+
+.end-page {
+  justify-content: flex-start;
+}
+
+.result {
+  font-size: 1.5rem;
+}
+
+.scores {
+  background-color: #2563eb;
+  padding: 25px 50px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+}
+
+.entry {
+  margin: 25px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.score {
+  margin-left: 25px;
+}
+
+.game-actions > *, .end-actions > * {
+  padding: 25px 50px;
+}
+
+.plug {
+  position: absolute;
+  bottom: 0;
 }
