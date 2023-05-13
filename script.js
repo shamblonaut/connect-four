@@ -12,6 +12,8 @@ const game = (() => {
     rows: 6,
     columns: 7,
   };
+  let difficulty;
+  let mode;
   let players = [];
   let currentPlayer;
   let win = {};
@@ -20,6 +22,7 @@ const game = (() => {
 
   const getBoard = () => board;
   const getPlayers = () => players;
+  const getMode = () => mode;
   const getCurrentPlayer = () => currentPlayer;
   const getSize = () => size;
   const getGameOver = () => gameOver;
@@ -29,6 +32,14 @@ const game = (() => {
     players = [new Player(playerOne, 1), new Player(playerTwo, 2)];
     currentPlayer = players[0];
   };
+
+  const setDifficulty = (gameDifficulty) => {
+    difficulty = gameDifficulty;
+  }
+
+  const setMode = (gameMode) => {
+    mode = gameMode;
+  }
 
   const resetScores = () => {
     if (players.length) {
@@ -81,7 +92,7 @@ const game = (() => {
                 [row - 2, column - 2],
                 [row - 3, column - 3],
               ];
-              return 1;
+              return board[row][column];
             }
             // Vertical
             else if (
@@ -95,7 +106,7 @@ const game = (() => {
                 [row - 2, column],
                 [row - 3, column],
               ];
-              return 1;
+              return board[row][column];
             }
             // Forward Diagonal
             else if (
@@ -109,7 +120,7 @@ const game = (() => {
                 [row - 2, column + 2],
                 [row - 3, column + 3],
               ];
-              return 1;
+              return board[row][column];
             }
           }
           // Horizontal
@@ -125,7 +136,7 @@ const game = (() => {
               [row, column + 2],
               [row, column + 3],
             ];
-            return 1;
+            return board[row][column];
           }
         }
       }
@@ -134,53 +145,167 @@ const game = (() => {
     if (filled) return -1;
   };
 
-  const calculateEmptySlot = (column) => {
+  const calculateEmptySlot = (slots, column) => {
     let row = size.rows - 1;
-    while (row > 0 && board[row][column] !== 0) {
+    while (row > 0 && slots[row][column] !== 0) {
       row--;
     }
 
-    if (row >= 0 && board[row][column] === 0) {
+    if (row >= 0 && slots[row][column] === 0) {
       return row;
     } else if (row === 0) {
       return null;
     }
   };
 
+  const minimax = (state, depth, alpha, beta, maximizingPlayer) => {
+    const winner = checkBoard(state);
+    if (winner || depth === 0) {
+      if (winner === 1) return { evaluation: 1 };
+      else if (winner === 2) return { evaluation: -1 };
+      else return { evaluation: 0 };
+    }
+
+    if (maximizingPlayer) {
+      let maximumEvaluation = { evaluation: -Infinity };
+      
+      for (let column = 0; column < size.columns; column++) {
+        let emptySlot = calculateEmptySlot(state, column);
+        if (emptySlot !== null) {
+          let newState = state.map((a) => [...a]);
+          newState[emptySlot][column] = 1;
+          const evaluation = minimax(
+            newState,
+            depth - 1,
+            alpha,
+            beta,
+            false
+          ).evaluation;
+
+          if (evaluation > maximumEvaluation.evaluation) {
+            maximumEvaluation.evaluation = evaluation;
+            maximumEvaluation.position = column;
+          }
+
+          alpha = Math.max(alpha, evaluation);
+          if (beta <= alpha) break;
+        }
+      }
+
+      return maximumEvaluation;
+    } else {
+      let minimumEvaluation = { evaluation: +Infinity };
+
+      for (let column = 0; column < size.columns; column++) {
+        let emptySlot = calculateEmptySlot(state, column);
+        if (emptySlot !== null) {
+          let newState = state.map((a) => [...a]);
+          newState[emptySlot][column] = 2;
+          const evaluation = minimax(
+            newState,
+            depth - 1,
+            alpha,
+            beta,
+            true
+          ).evaluation;
+
+          if (evaluation < minimumEvaluation.evaluation) {
+            minimumEvaluation.evaluation = evaluation;
+            minimumEvaluation.position = column;
+          }
+
+          beta = Math.min(beta, evaluation);
+          if (beta <= alpha) break;
+        }
+      }
+
+      return minimumEvaluation;
+    }
+  }
+
   const placePiece = (column) => {
     if (!gameOver) {
-      const piece = currentPlayer.piece;
-
-      const emptySlot = calculateEmptySlot(column);
+      const emptySlot = calculateEmptySlot(board, column);
       if (emptySlot !== null) {
-        board[emptySlot][column] = piece;
+        board[emptySlot][column] = currentPlayer.piece;
 
         const result = checkBoard(board);
         if (result) {
           gameOver = true;
-          win.winner = currentPlayer.name;
-          if (win.winner === players[0].name) {
-            players[0].score++;
-          } else if (win.winner === players[1].name) {
-            players[1].score++;
+          if (result > 0) {
+            win.winner = currentPlayer.name;
+            if (win.winner === players[0].name) {
+              players[0].score++;
+            } else if (win.winner === players[1].name) {
+              players[1].score++;
+            }
           }
-          return win.winner;
         }
         currentPlayer = currentPlayer === players[0] ? players[1] : players[0];
+        return true;
       }
+      return false;
+    }
+  };
 
-      // displayBoard();
+  const placePlayerPiece = (column) => {
+    if (currentPlayer.name !== "Computer") {
+      return placePiece(column);
+    }
+    return false;
+  }
+
+  const placeComputerPiece = () => {
+    let emptyBoard = true;
+    for (let column = 0; column < size.columns; column++) {
+      if (board[size.rows - 1][column] !== 0) {
+        emptyBoard = false;
+      }
+    }
+    if (difficulty === "easy" || emptyBoard) {
+      let position = Math.floor(Math.random() * size.columns);
+      while (!placePiece(position)) {
+        position = Math.floor(Math.random() * size.columns);
+      }
+    } else {
+      let blunderChance = 0;
+      if (difficulty === "normal") blunderChance = 50;
+      else if (difficulty === "hard") blunderChance = 25;
+
+      if (Math.floor(Math.random() * 100) < blunderChance) {
+        let position = Math.floor(Math.random() * size.columns);
+        while (!placePiece(position)) {
+          position = Math.floor(Math.random() * size.columns);
+        }
+      } else {
+        const isMaximizing = currentPlayer === players[0];
+        const startTime = performance.now();
+        let position = minimax(
+          board,
+          5,
+          -Infinity,
+          +Infinity,
+          isMaximizing
+        ).position;
+        console.log(`Time taken: ${(performance.now() - startTime)} ms`);
+        placePiece(position);
+      }
     }
   };
 
   return {
     displayBoard,
     setPlayers,
-    placePiece,
+    setDifficulty,
+    setMode,
+    placePlayerPiece,
+    placeComputerPiece,
+    calculateEmptySlot,
     resetScores,
     resetBoard,
     getBoard,
     getPlayers,
+    getMode,
     getCurrentPlayer,
     getSize,
     getGameOver,
@@ -231,19 +356,17 @@ const displayController = (() => {
       const rowContainer = gameBoardContainer.children[row];
       for (let column = 0; column < game.getSize().columns; column++) {
         const squareContainer = rowContainer.children[column];
-        if (squareContainer.hasChildNodes()) {
-          squareContainer.removeChild(squareContainer.children[0]);
-        }
+        const pieceContainer = squareContainer.firstElementChild;
 
         const piece = game.getBoard()[row][column];
-        if (piece !== 0) {
-          const pieceContainer = document.createElement("div");
-          pieceContainer.classList.add("piece");
-
-          if (piece === 1) pieceContainer.classList.add("one");
-          else if (piece === 2) pieceContainer.classList.add("two");
-
-          squareContainer.appendChild(pieceContainer);
+        if (piece === 1) {
+          pieceContainer.classList.remove("ghost");
+          pieceContainer.classList.remove("two");
+          pieceContainer.classList.add("one");
+        } else if (piece === 2) {
+          pieceContainer.classList.remove("ghost");
+          pieceContainer.classList.remove("one");
+          pieceContainer.classList.add("two");
         }
 
         if (!game.getGameOver()) {
@@ -253,7 +376,7 @@ const displayController = (() => {
     }
   };
 
-  const checkGameState = (winner) => {
+  const updateResult = (winner) => {
     if (game.getGameOver()) {
       if (winner) {
         let connection = game.getWin().connection;
@@ -299,14 +422,18 @@ const displayController = (() => {
     const playerName = form.get("player-name")
       ? form.get("player-name")
       : "Player";
+    const difficulty = form.get("difficulty");
+    
     if (playerTurn === "one") {
       game.setPlayers(playerName, "Computer");
     } else if (playerTurn === "two") {
       game.setPlayers("Computer", playerName);
     }
+    game.setDifficulty(difficulty);
 
     changeDisplayWrapper(computerNamesWrapper, gamePageWrapper);
     game.resetBoard();
+    game.setMode("computer");
     updateBoard();
   });
 
@@ -324,6 +451,7 @@ const displayController = (() => {
 
     changeDisplayWrapper(friendNamesWrapper, gamePageWrapper);
     game.resetBoard();
+    game.setMode("friend");
     updateBoard();
   });
 
@@ -358,13 +486,55 @@ const displayController = (() => {
     for (let column = 0; column < game.getSize().columns; column++) {
       const squareContainer = document.createElement("button");
       squareContainer.classList.add("square");
+      squareContainer.dataset.column = column;
+
+      const pieceContainer = document.createElement("div");
+      pieceContainer.classList.add("piece");
+      squareContainer.appendChild(pieceContainer);
 
       squareContainer.addEventListener("click", () => {
         if (!game.getGameOver()) {
-          const winner = game.placePiece(column);
-          updateBoard();
-          checkGameState(winner);
+          if (game.placePlayerPiece(column)) {
+            updateBoard();
+            updateResult(game.getWin().winner);
+            if (!game.getGameOver() && game.getMode() === "computer")  {
+              setTimeout(() => {
+                game.placeComputerPiece();
+                updateBoard();
+                updateResult(game.getWin().winner);
+              }, 0.5 * 1000);
+            }
+          }
         }
+      });
+
+      squareContainer.addEventListener("mouseenter", (event) => {
+        if (game.getCurrentPlayer().name !== "Computer") {
+          const ghostPieceContainer =
+            gameBoardContainer.children[
+              game.calculateEmptySlot(
+                game.getBoard(),
+                event.target.dataset.column
+              )
+            ].children[event.target.dataset.column].firstElementChild;
+          ghostPieceContainer.classList.add("ghost");
+          ghostPieceContainer.classList.add(
+            game.getCurrentPlayer() === game.getPlayers()[0] ? "one" : "two"
+          );
+        }
+      });
+
+      squareContainer.addEventListener("mouseleave", (event) => {
+        const ghostPieceContainer =
+          gameBoardContainer.children[
+            game.calculateEmptySlot(
+              game.getBoard(),
+              event.target.dataset.column
+            )
+          ].children[event.target.dataset.column].firstElementChild;
+        ghostPieceContainer.classList.remove("ghost");
+        ghostPieceContainer.classList.remove("one");
+        ghostPieceContainer.classList.remove("two");
       });
 
       rowContainer.appendChild(squareContainer);

@@ -23,7 +23,7 @@
       <form action="" class="naming-form">
         <div class="heading">Enter your name</div>
         <div class="field">
-          <label for="player">Player: </label>
+          <label for="player">Name: </label>
           <input type="text" name="player-name" id="player" placeholder="Player" />
         </div>
         <div class="field">
@@ -45,6 +45,15 @@
             />
             <label for="player-two">Player Two</label>
           </div>
+        </div>
+        <div class="field">
+          <label for="difficulty">Difficulty: </label>
+          <select name="difficulty" id="difficulty">
+            <option value="easy" selected>Easy</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Hard</option>
+            <option value="impossible">Impossible</option>
+          </select>
         </div>
         <div class="form-actions">
           <button class="back">Cancel</button>
